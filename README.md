@@ -2,6 +2,21 @@
 
 A modern web-based dashboard to manage all your projects with integrated Claude Code AI assistant.
 
+## 🚀 Quick Start (TL;DR)
+
+```bash
+# 1. Setup environment
+cp .env.example .env
+# Edit .env and set PROJECTS_PATH
+
+# 2. Start everything
+./start.sh
+
+# 3. Access
+# Project Manager: http://localhost:3000
+# Claude Code WebUI: http://localhost:8081
+```
+
 ## Features
 
 - 📊 **Project Overview**: View total projects, Git repositories, modified projects at a glance
@@ -16,7 +31,13 @@ A modern web-based dashboard to manage all your projects with integrated Claude 
 ### 1. Install Docker
 - Download Docker Desktop: https://www.docker.com/products/docker-desktop
 
-### 2. Configure Environment
+### 2. Install Claude CLI (Optional, for AI assistant)
+```bash
+# Visit https://claude.ai/code for installation instructions
+npm install -g claude-code
+```
+
+### 3. Configure Environment
 ```bash
 # Copy environment template
 cp .env.example .env
@@ -25,18 +46,30 @@ cp .env.example .env
 # PROJECTS_PATH=/path/to/your/projects
 ```
 
-### 3. Run with Docker
+### 4. Start Everything
 ```bash
-# Using the provided script (easiest)
-./run-docker.sh
-
-# Or manually
-docker compose up -d --build
+# Start all services (Project Manager + Claude Code WebUI)
+./start.sh
 ```
 
-### 4. Access
+### 5. Access
 - **Project Manager**: http://localhost:3000
-- **Claude Code**: http://localhost:8081
+- **Claude Code WebUI**: http://localhost:8081 (if Claude CLI is installed)
+
+### 6. Management Commands
+```bash
+# Stop all services
+./stop.sh
+
+# Restart all services
+./restart.sh
+
+# Check status
+docker compose ps
+
+# View WebUI logs
+tail -f logs/webui.log
+```
 
 For detailed Docker instructions, see [README.docker.md](./README.docker.md)
 

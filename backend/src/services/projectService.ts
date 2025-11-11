@@ -3,7 +3,9 @@ import { join } from 'path';
 import { execSync } from 'child_process';
 import type { ProjectInfo, GitStatus, ModifiedInfo, ReadmeInfo, PackageInfo } from '../types/index.js';
 
-const PROJECT_ROOT = join(process.cwd(), '..');
+// 환경 변수로 프로젝트 루트 경로 설정 가능
+// Docker 환경에서는 PROJECTS_ROOT를 /projects로 설정하고 볼륨 마운트
+const PROJECT_ROOT = process.env.PROJECTS_ROOT || join(process.cwd(), '..');
 
 /**
  * 프로젝트 타입 감지

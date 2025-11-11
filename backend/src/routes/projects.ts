@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { getAllProjects, getProjectInfo, getModifiedProjects, readPackageJson } from '../services/projectService.js';
 import { join } from 'path';
 
-const PROJECT_ROOT = join(process.cwd(), '..');
+const PROJECT_ROOT = process.env.PROJECTS_ROOT || join(process.cwd(), '..');
 
 export const projectsRouter = new Hono();
 
@@ -15,6 +15,23 @@ projectsRouter.get('/', async (c) => {
     return c.json({ success: true, projects });
   } catch (error) {
     console.error('Error fetching projects:', error);
+    return c.json(
+      { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
+      500
+    );
+  }
+});
+
+/**
+ * GET /api/projects/git-status - Git 변경사항이 있는 프로젝트만
+ * 주의: /:name 라우트보다 먼저 정의해야 함
+ */
+projectsRouter.get('/git-status', async (c) => {
+  try {
+    const projects = await getModifiedProjects();
+    return c.json({ success: true, projects });
+  } catch (error) {
+    console.error('Error fetching git status:', error);
     return c.json(
       { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
       500
@@ -43,22 +60,6 @@ projectsRouter.get('/:name', async (c) => {
     return c.json({ success: true, project, packageInfo });
   } catch (error) {
     console.error('Error fetching project details:', error);
-    return c.json(
-      { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
-      500
-    );
-  }
-});
-
-/**
- * GET /api/git-status - Git 변경사항이 있는 프로젝트만
- */
-projectsRouter.get('/git-status', async (c) => {
-  try {
-    const projects = await getModifiedProjects();
-    return c.json({ success: true, projects });
-  } catch (error) {
-    console.error('Error fetching git status:', error);
     return c.json(
       { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
       500

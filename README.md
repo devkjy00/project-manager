@@ -1,33 +1,72 @@
 # Project Management Web Dashboard
 
-A web-based dashboard to manage all your projects at a glance.
+A modern web-based dashboard to manage all your projects with integrated Claude Code AI assistant.
 
 ## Features
 
 - 📊 **Project Overview**: View total projects, Git repositories, modified projects at a glance
 - 🔍 **Filtering**: Filter by project type (Node.js, Python, Java, etc.)
 - 📝 **Git Status**: Check Git branch, changes, and sync status for each project
-- 🎨 **Beautiful UI**: Gradient background with card-based layout
-- 🔄 **Auto Refresh**: Automatically update project status every 30 seconds
+- 🤖 **Claude Code Integration**: AI-powered coding assistant in a web interface
+- 🎨 **Beautiful UI**: Modern React UI with TailwindCSS
+- 🔄 **Real-time Updates**: Live project status updates
 
-## Installation
+## Quick Start (Docker - Recommended)
 
+### 1. Install Docker
+- Download Docker Desktop: https://www.docker.com/products/docker-desktop
+
+### 2. Configure Environment
 ```bash
-# Install dependencies
+# Copy environment template
+cp .env.example .env
+
+# Edit .env and set your projects directory
+# PROJECTS_PATH=/path/to/your/projects
+```
+
+### 3. Run with Docker
+```bash
+# Using the provided script (easiest)
+./run-docker.sh
+
+# Or manually
+docker compose up -d --build
+```
+
+### 4. Access
+- **Project Manager**: http://localhost:3000
+- **Claude Code**: http://localhost:8081
+
+For detailed Docker instructions, see [README.docker.md](./README.docker.md)
+
+## Local Development
+
+### Prerequisites
+- Node.js 20+
+- Claude CLI installed (https://claude.ai/code)
+
+### Backend
+```bash
+cd backend
 npm install
+npm run dev  # Port 3000
 ```
 
-## Usage
-
+### Frontend
 ```bash
-# Start server
-npm start
-
-# Or development mode (auto-restart)
-npm run dev
+cd frontend
+npm install
+npm run dev  # Port 5173
 ```
 
-Once the server starts, access **http://localhost:3000** in your browser.
+### Claude Code WebUI
+```bash
+npm install -g claude-code-webui
+claude-code-webui --port 8081
+```
+
+Access the dev frontend at **http://localhost:5173**
 
 ## Interface
 
@@ -62,6 +101,21 @@ Each project card displays the following information:
 
 ## Tech Stack
 
-- **Backend**: Node.js, Express
-- **Frontend**: Vanilla JavaScript, HTML5, CSS3
-- **Git Integration**: child_process (execSync)
+### Backend
+- **Framework**: Hono (Fast web framework)
+- **Language**: TypeScript
+- **Runtime**: Node.js 20+
+
+### Frontend
+- **Framework**: React 19
+- **Build Tool**: Vite 7
+- **Styling**: TailwindCSS 4
+- **Language**: TypeScript
+
+### AI Integration
+- **Claude Code**: AI-powered coding assistant
+- **claude-code-webui**: Web interface for Claude CLI
+
+### DevOps
+- **Containerization**: Docker & Docker Compose
+- **Development**: Hot reload for backend and frontend

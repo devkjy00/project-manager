@@ -3,7 +3,7 @@
 ## 프로젝트: claude-code-webui 통합
 
 **claude-code-webui**는 Claude Code CLI를 웹 인터페이스로 사용할 수 있게 해주는 전용 프로젝트입니다.
-이미 `/Users/jy_mac/MyDir/project/claude-code-webui`에 설치되어 있습니다!
+https://github.com/sugyan/claude-code-webui
 
 ---
 

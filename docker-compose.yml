@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  # Project Manager (Backend + Frontend)
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: project-manager-app
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - NODE_ENV=production
+      - PROJECTS_ROOT=/projects
+    volumes:
+      # 호스트의 프로젝트 디렉토리를 컨테이너의 /projects에 마운트
+      # 실제 프로젝트 경로로 변경하세요
+      - ${PROJECTS_PATH:-/Users/inswave/MyDir/projec}:/projects:ro
+    restart: unless-stopped
+    networks:
+      - project-manager-network
+
+  # Claude Code WebUI
+  claude-code-webui:
+    image: node:20-alpine
+    container_name: claude-code-webui
+    working_dir: /app
+    command: sh -c "npm install -g claude-code-webui && claude-code-webui --port 8081"
+    ports:
+      - "8081:8081"
+    volumes:
+      # Mount Claude CLI configuration from host
+      - ${HOME}/.claude.json:/root/.claude.json:ro
+      - ${HOME}/.claude:/root/.claude:ro
+      # Mount Node.js binary if Claude CLI is installed via npm/nvm
+      - ${HOME}/.nvm/versions/node/v20.16.0/bin/claude:/usr/local/bin/claude:ro
+      # Mount projects directory (read-write for Claude to make changes)
+      - ${PROJECTS_PATH:-/Users/inswave/MyDir/projec}:/projects:rw
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+    networks:
+      - project-manager-network
+
+networks:
+  project-manager-network:
+    driver: bridge

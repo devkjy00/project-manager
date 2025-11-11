@@ -1,22 +1,22 @@
-<!DOCTYPE html>
-<html lang="ko">
+<!DOCTYPE html> <!-- HTML5 문서 선언 -->
+<html lang="ko"> <!-- 한국어 페이지 설정 -->
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Project Dashboard</title>
+    <meta charset="UTF-8" /> <!-- UTF-8 인코딩 설정 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /> <!-- 반응형 디자인을 위한 뷰포트 설정 -->
+    <title>Project Dashboard</title> <!-- 페이지 제목 -->
     <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
+      * { /* 모든 요소에 대한 기본 스타일 초기화 */
+        margin: 0; /* 외부 여백 제거 */
+        padding: 0; /* 내부 여백 제거 */
+        box-sizing: border-box; /* 박스 크기 계산 방식 설정 */
       }
 
-      body {
+      body { /* body 태그 스타일 */
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
-          sans-serif;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        min-height: 100vh;
-        padding: 20px;
+          sans-serif; /* 시스템 기본 폰트 사용 */
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); /* 그라데이션 배경 */
+        min-height: 100vh; /* 최소 높이를 뷰포트 높이로 설정 */
+        padding: 20px; /* 내부 여백 */
       }
 
       .container {
@@ -462,72 +462,72 @@
     </div>
 
     <script>
-      let allProjects = [];
-      let currentFilter = 'all';
+      let allProjects = []; // 전체 프로젝트 목록을 저장하는 배열
+      let currentFilter = 'all'; // 현재 선택된 필터
 
       // 프로젝트 로드
-      async function loadProjects() {
-        try {
-          console.log('Loading projects...');
-          document.getElementById('loading').style.display = 'block';
-          document.getElementById('error').style.display = 'none';
+      async function loadProjects() { // 서버에서 프로젝트 목록을 가져오는 비동기 함수
+        try { // 예외 처리 시작
+          console.log('Loading projects...'); // 로딩 시작 로그
+          document.getElementById('loading').style.display = 'block'; // 로딩 표시
+          document.getElementById('error').style.display = 'none'; // 에러 메시지 숨김
 
-          const response = await fetch('/api/projects');
-          console.log('Response status:', response.status);
+          const response = await fetch('/api/projects'); // API 호출
+          console.log('Response status:', response.status); // 응답 상태 로그
 
-          const data = await response.json();
-          console.log('Projects data:', data);
+          const data = await response.json(); // JSON 응답 파싱
+          console.log('Projects data:', data); // 데이터 로그
 
-          if (data.success) {
-            allProjects = data.projects;
-            console.log('Total projects loaded:', allProjects.length);
-            updateStats();
-            displayProjects(allProjects);
-          } else {
-            throw new Error(data.error);
+          if (data.success) { // 성공적으로 데이터를 받았으면
+            allProjects = data.projects; // 전역 변수에 프로젝트 목록 저장
+            console.log('Total projects loaded:', allProjects.length); // 로드된 프로젝트 수 로그
+            updateStats(); // 통계 업데이트
+            displayProjects(allProjects); // 프로젝트 목록 화면에 표시
+          } else { // 실패하면
+            throw new Error(data.error); // 에러 발생
           }
-        } catch (error) {
-          console.error('Error loading projects:', error);
-          document.getElementById('error').textContent = 'Error loading projects: ' + error.message;
-          document.getElementById('error').style.display = 'block';
-        } finally {
-          document.getElementById('loading').style.display = 'none';
+        } catch (error) { // 예외 발생 시
+          console.error('Error loading projects:', error); // 에러 로그
+          document.getElementById('error').textContent = 'Error loading projects: ' + error.message; // 에러 메시지 설정
+          document.getElementById('error').style.display = 'block'; // 에러 메시지 표시
+        } finally { // 성공/실패 여부와 관계없이 실행
+          document.getElementById('loading').style.display = 'none'; // 로딩 표시 숨김
         }
       }
 
       // 통계 업데이트
-      function updateStats() {
-        const total = allProjects.length;
-        const gitRepos = allProjects.filter((p) => p.git.hasGit).length;
-        const modified = allProjects.filter((p) => p.git.changes > 0).length;
-        const nodeProjects = allProjects.filter((p) => p.types.includes('Node.js')).length;
+      function updateStats() { // 대시보드 상단의 통계 카드를 업데이트하는 함수
+        const total = allProjects.length; // 전체 프로젝트 수
+        const gitRepos = allProjects.filter((p) => p.git.hasGit).length; // Git 저장소 개수
+        const modified = allProjects.filter((p) => p.git.changes > 0).length; // 변경사항이 있는 프로젝트 수
+        const nodeProjects = allProjects.filter((p) => p.types.includes('Node.js')).length; // Node.js 프로젝트 수
 
-        document.getElementById('totalProjects').textContent = total;
-        document.getElementById('gitRepos').textContent = gitRepos;
-        document.getElementById('modifiedCount').textContent = modified;
-        document.getElementById('nodeProjects').textContent = nodeProjects;
+        document.getElementById('totalProjects').textContent = total; // 전체 프로젝트 수 표시
+        document.getElementById('gitRepos').textContent = gitRepos; // Git 저장소 수 표시
+        document.getElementById('modifiedCount').textContent = modified; // 변경된 프로젝트 수 표시
+        document.getElementById('nodeProjects').textContent = nodeProjects; // Node.js 프로젝트 수 표시
       }
 
       // 프로젝트 표시
-      function displayProjects(projects) {
-        const grid = document.getElementById('projectsGrid');
-        grid.innerHTML = '';
+      function displayProjects(projects) { // 프로젝트 목록을 화면에 표시하는 함수
+        const grid = document.getElementById('projectsGrid'); // 프로젝트 그리드 요소 가져오기
+        grid.innerHTML = ''; // 기존 내용 지우기
 
-        if (projects.length === 0) {
-          grid.innerHTML = '<p style="color: white; grid-column: 1/-1;">No projects found.</p>';
-          return;
+        if (projects.length === 0) { // 프로젝트가 없으면
+          grid.innerHTML = '<p style="color: white; grid-column: 1/-1;">No projects found.</p>'; // 없음 메시지 표시
+          return; // 함수 종료
         }
 
-        projects.forEach((project) => {
-          const card = createProjectCard(project);
-          grid.appendChild(card);
+        projects.forEach((project) => { // 각 프로젝트에 대해
+          const card = createProjectCard(project); // 프로젝트 카드 생성
+          grid.appendChild(card); // 그리드에 카드 추가
         });
       }
 
       // 프로젝트 카드 생성
-      function createProjectCard(project) {
-        const card = document.createElement('div');
-        card.className = 'project-card';
+      function createProjectCard(project) { // 개별 프로젝트 카드를 생성하는 함수
+        const card = document.createElement('div'); // div 요소 생성
+        card.className = 'project-card'; // CSS 클래스 설정
 
         const typeBadges = project.types.map((type) => `<span class="project-type">${type}</span>`).join('');
 
@@ -598,34 +598,34 @@
       }
 
       // 프로젝트 상세 정보 모달 표시
-      function showProjectDetails(project) {
-        console.log('Project Details:', project);
+      function showProjectDetails(project) { // 프로젝트 상세 정보를 모달로 표시하는 함수
+        console.log('Project Details:', project); // 프로젝트 정보 로그
 
-        const modal = document.getElementById('readmeModal');
-        const modalTitle = document.getElementById('modalTitle');
-        const modalBody = document.getElementById('modalBody');
+        const modal = document.getElementById('readmeModal'); // 모달 요소 가져오기
+        const modalTitle = document.getElementById('modalTitle'); // 모달 제목 요소 가져오기
+        const modalBody = document.getElementById('modalBody'); // 모달 본문 요소 가져오기
 
-        modalTitle.textContent = `${project.name} - README`;
+        modalTitle.textContent = `${project.name} - README`; // 모달 제목 설정
 
-        if (project.readme && project.readme.exists) {
+        if (project.readme && project.readme.exists) { // README 파일이 존재하면
           // 마크다운을 간단히 HTML로 변환 (기본적인 변환만)
-          let html = project.readme.content
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-            .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-            .replace(/^# (.*$)/gim, '<h1>$1</h1>')
-            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-            .replace(/\*(.*?)\*/g, '<em>$1</em>')
-            .replace(/`([^`]+)`/g, '<code>$1</code>')
-            .replace(/\n\n/g, '</p><p>')
-            .replace(/\n/g, '<br>');
+          let html = project.readme.content // README 내용 가져오기
+            .replace(/&/g, '&amp;') // & 문자 이스케이프
+            .replace(/</g, '&lt;') // < 문자 이스케이프
+            .replace(/>/g, '&gt;') // > 문자 이스케이프
+            .replace(/^### (.*$)/gim, '<h3>$1</h3>') // ### 헤더를 h3로 변환
+            .replace(/^## (.*$)/gim, '<h2>$1</h2>') // ## 헤더를 h2로 변환
+            .replace(/^# (.*$)/gim, '<h1>$1</h1>') // # 헤더를 h1로 변환
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // **bold**를 strong으로 변환
+            .replace(/\*(.*?)\*/g, '<em>$1</em>') // *italic*을 em으로 변환
+            .replace(/`([^`]+)`/g, '<code>$1</code>') // `code`를 code 태그로 변환
+            .replace(/\n\n/g, '</p><p>') // 빈 줄을 문단으로 변환
+            .replace(/\n/g, '<br>'); // 줄바꿈을 br 태그로 변환
 
-          html = '<p>' + html + '</p>';
-          modalBody.innerHTML = html;
-        } else {
-          modalBody.innerHTML = `
+          html = '<p>' + html + '</p>'; // p 태그로 감싸기
+          modalBody.innerHTML = html; // 모달 본문에 HTML 설정
+        } else { // README 파일이 없으면
+          modalBody.innerHTML = ` // 기본 프로젝트 정보 표시
             <p style="color: #999;">이 프로젝트에는 README.md 파일이 없습니다.</p>
             <p>프로젝트 정보:</p>
             <ul>
@@ -636,85 +636,85 @@
           `;
         }
 
-        modal.classList.add('show');
+        modal.classList.add('show'); // 모달 표시
       }
 
       // 모달 닫기
-      function closeModal() {
-        const modal = document.getElementById('readmeModal');
-        modal.classList.remove('show');
+      function closeModal() { // 모달을 닫는 함수
+        const modal = document.getElementById('readmeModal'); // 모달 요소 가져오기
+        modal.classList.remove('show'); // show 클래스 제거하여 모달 숨김
       }
 
       // 필터링
-      function filterProjects(filter) {
-        currentFilter = filter;
+      function filterProjects(filter) { // 프로젝트를 필터링하는 함수
+        currentFilter = filter; // 현재 필터 저장
 
         // 버튼 활성화 상태 변경
-        document.querySelectorAll('.filter-btn').forEach((btn) => {
-          btn.classList.remove('active');
-          if (btn.dataset.filter === filter) {
-            btn.classList.add('active');
+        document.querySelectorAll('.filter-btn').forEach((btn) => { // 모든 필터 버튼에 대해
+          btn.classList.remove('active'); // active 클래스 제거
+          if (btn.dataset.filter === filter) { // 현재 선택된 필터 버튼이면
+            btn.classList.add('active'); // active 클래스 추가
           }
         });
 
-        let filtered = allProjects;
+        let filtered = allProjects; // 필터링할 프로젝트 목록 초기화
 
-        switch (filter) {
-          case 'node':
-            filtered = allProjects.filter((p) => p.types.includes('Node.js'));
+        switch (filter) { // 필터 타입에 따라 분기
+          case 'node': // Node.js 필터
+            filtered = allProjects.filter((p) => p.types.includes('Node.js')); // Node.js 프로젝트만 필터링
             break;
-          case 'python':
-            filtered = allProjects.filter((p) => p.types.includes('Python'));
+          case 'python': // Python 필터
+            filtered = allProjects.filter((p) => p.types.includes('Python')); // Python 프로젝트만 필터링
             break;
-          case 'java':
-            filtered = allProjects.filter((p) => p.types.includes('Java/Spring'));
+          case 'java': // Java 필터
+            filtered = allProjects.filter((p) => p.types.includes('Java/Spring')); // Java/Spring 프로젝트만 필터링
             break;
-          case 'modified':
-            filtered = allProjects.filter((p) => p.git.changes > 0);
+          case 'modified': // 변경사항 필터
+            filtered = allProjects.filter((p) => p.git.changes > 0); // 변경사항이 있는 프로젝트만 필터링
             break;
-          case 'no-git':
-            filtered = allProjects.filter((p) => !p.git.hasGit);
+          case 'no-git': // Git 없음 필터
+            filtered = allProjects.filter((p) => !p.git.hasGit); // Git이 없는 프로젝트만 필터링
             break;
-          default:
-            filtered = allProjects;
+          default: // 전체 보기
+            filtered = allProjects; // 모든 프로젝트 표시
         }
 
-        displayProjects(filtered);
+        displayProjects(filtered); // 필터링된 프로젝트 표시
       }
 
       // 이벤트 리스너
-      document.querySelectorAll('.filter-btn').forEach((btn) => {
-        btn.addEventListener('click', () => {
-          filterProjects(btn.dataset.filter);
+      document.querySelectorAll('.filter-btn').forEach((btn) => { // 모든 필터 버튼에 대해
+        btn.addEventListener('click', () => { // 클릭 이벤트 리스너 추가
+          filterProjects(btn.dataset.filter); // 필터 적용
         });
       });
 
-      document.getElementById('refreshBtn').addEventListener('click', () => {
-        loadProjects();
+      document.getElementById('refreshBtn').addEventListener('click', () => { // 새로고침 버튼 클릭 시
+        loadProjects(); // 프로젝트 목록 다시 로드
       });
 
       // 모달 이벤트 리스너
-      document.getElementById('closeModal').addEventListener('click', closeModal);
+      document.getElementById('closeModal').addEventListener('click', closeModal); // 닫기 버튼 클릭 시 모달 닫기
 
       // 모달 배경 클릭 시 닫기
-      document.getElementById('readmeModal').addEventListener('click', (e) => {
-        if (e.target.id === 'readmeModal') {
-          closeModal();
+      document.getElementById('readmeModal').addEventListener('click', (e) => { // 모달 클릭 이벤트
+        if (e.target.id === 'readmeModal') { // 모달 배경을 클릭한 경우
+          closeModal(); // 모달 닫기
         }
       });
 
       // ESC 키로 모달 닫기
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-          closeModal();
+      document.addEventListener('keydown', (e) => { // 키보드 이벤트 리스너
+        if (e.key === 'Escape') { // ESC 키를 누르면
+          closeModal(); // 모달 닫기
         }
       });
 
       // 초기 로드
-      loadProjects();
+      loadProjects(); // 페이지 로드 시 프로젝트 목록 가져오기
 
       // 자동 새로고침 (30초마다)
-      setInterval(loadProjects, 30000);
+      setInterval(loadProjects, 30000); // 30초마다 프로젝트 목록 자동 새로고침
     </script>
   </body>
 </html>

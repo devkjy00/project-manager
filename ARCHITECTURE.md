@@ -9,6 +9,7 @@
 - 🔄 **실시간 모니터링**: Git 상태, 프로젝트 타입, 수정 시간 등을 실시간으로 확인
 - 📝 **문서 자동화**: README 자동 생성 및 미리보기
 - 🎨 **직관적 UI**: 카드 기반 레이아웃으로 프로젝트 정보를 시각화
+- 🤖 **AI 코딩 지원**: Claude Code 웹 인터페이스 통합
 
 ---
 
@@ -19,509 +20,375 @@
 │                        사용자                                │
 │                    (웹 브라우저)                             │
 └────────────────────┬────────────────────────────────────────┘
-                     │ HTTP/REST
+                     │ HTTP/REST + NDJSON Streaming
                      ▼
 ┌─────────────────────────────────────────────────────────────┐
 │                   Frontend Layer                             │
-│                  (Vanilla JavaScript)                        │
+│              (React 19 + TypeScript)                         │
 │  ┌─────────────┐  ┌─────────────┐  ┌──────────────┐       │
-│  │   UI/UX     │  │   State     │  │  API Client  │       │
-│  │ - Cards     │  │ - Projects  │  │ - fetch()    │       │
-│  │ - Modal     │  │ - Filter    │  │ - Polling    │       │
-│  │ - Filters   │  │ - Cache     │  │              │       │
+│  │ Components  │  │   Hooks     │  │    State     │       │
+│  │ - Projects  │  │ - useProj.. │  │ - Context    │       │
+│  │ - GitStatus │  │ - useGit... │  │ - Zustand    │       │
+│  │ - ClaudeUI  │  │ - useChat.. │  │              │       │
 │  └─────────────┘  └─────────────┘  └──────────────┘       │
+│                                                              │
+│  Build: Vite + SWC                                          │
+│  Styling: TailwindCSS v4                                    │
 └────────────────────┬────────────────────────────────────────┘
-                     │ REST API
+                     │ REST API + Streaming
                      ▼
 ┌─────────────────────────────────────────────────────────────┐
 │                   Backend Layer                              │
-│                   (Node.js + Express)                        │
+│              (Hono + TypeScript)                            │
 │  ┌─────────────┐  ┌─────────────┐  ┌──────────────┐       │
-│  │  REST API   │  │  Business   │  │   Analyzer   │       │
-│  │  Routes     │  │   Logic     │  │  - Type      │       │
-│  │             │  │             │  │  - Git       │       │
-│  │ /api/       │  │ - Scan      │  │  - README    │       │
-│  │  projects   │  │ - Analyze   │  │              │       │
+│  │  Hono App   │  │  Handlers   │  │   Services   │       │
+│  │             │  │             │  │              │       │
+│  │ - Routes    │  │ - Projects  │  │ - Type Det.. │       │
+│  │ - Middlew.. │  │ - Git       │  │ - Git Analy..│       │
+│  │ - CORS      │  │ - Claude    │  │ - README     │       │
 │  └─────────────┘  └─────────────┘  └──────────────┘       │
+│                                                              │
+│  Runtime: Node.js 20+ / Deno (optional)                    │
 └────────────────────┬────────────────────────────────────────┘
-                     │ File System Access
+                     │ File System + Git CLI
                      ▼
 ┌─────────────────────────────────────────────────────────────┐
 │                  Data Source Layer                           │
 │  ┌──────────────────────────────────────────────────────┐  │
 │  │             File System                               │  │
 │  │  - Project Directories                                │  │
-│  │  - package.json, requirements.txt, build.gradle      │  │
+│  │  - package.json, requirements.txt, etc.              │  │
 │  │  - README.md                                          │  │
 │  │  - .git/                                              │  │
 │  └──────────────────────────────────────────────────────┘  │
 │  ┌──────────────────────────────────────────────────────┐  │
 │  │              Git CLI                                  │  │
-│  │  - git status                                         │  │
-│  │  - git branch                                         │  │
-│  │  - git rev-list                                       │  │
+│  │  - git status, branch, rev-list                      │  │
+│  └──────────────────────────────────────────────────────┘  │
+│  ┌──────────────────────────────────────────────────────┐  │
+│  │           Claude Code CLI                             │  │
+│  │  - @anthropic-ai/claude-code SDK                     │  │
 │  └──────────────────────────────────────────────────────┘  │
 └─────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 📦 컴포넌트 상세 설계
+## 📦 기술 스택 (2025 Modern Stack)
 
-### 1. Frontend Layer (클라이언트)
+### Frontend
+- **Framework**: React 19.0 (최신)
+- **Language**: TypeScript 5.7+
+- **Build Tool**: Vite 6.0 + SWC
+- **Styling**: TailwindCSS v4 (CSS-first configuration)
+- **Router**: React Router v7 (optional)
+- **State Management**:
+  - React Context API (작은 상태)
+  - Zustand (전역 상태, optional)
+- **HTTP Client**: Fetch API (native)
+- **Code Editor**: CodeMirror 6 (Claude 통합용)
 
-#### 1.1 기술 스택
-- **언어**: Vanilla JavaScript (ES6+)
-- **스타일**: CSS3 (Flexbox, Grid)
-- **통신**: Fetch API
-- **렌더링**: 동적 DOM 조작
+### Backend
+- **Framework**: Hono 4.0+
+- **Language**: TypeScript 5.7+
+- **Runtime**: Node.js 20+ (primary), Deno 2.0+ (optional)
+- **Validation**: Zod (타입 안전한 검증)
+- **Logging**: Hono Logger middleware
+- **File System**: Node.js fs/promises
+- **Process Execution**: Node.js child_process
 
-#### 1.2 주요 모듈
+### DevOps & Build
+- **Package Manager**: npm / pnpm
+- **Linting**: ESLint 9 (Flat Config)
+- **Formatting**: Prettier
+- **Type Checking**: tsc --noEmit
+- **Testing**: Vitest (unit), Playwright (e2e)
 
-```javascript
-// 상태 관리
-let allProjects = [];        // 전체 프로젝트 데이터
-let currentFilter = 'all';   // 현재 필터 상태
+---
 
-// 핵심 함수
-- loadProjects()            // API에서 프로젝트 데이터 로드
-- updateStats()             // 통계 카드 업데이트
-- displayProjects()         // 프로젝트 카드 렌더링
-- createProjectCard()       // 개별 카드 생성
-- showProjectDetails()      // README 모달 표시
-- filterProjects()          // 필터링 로직
+## 🔌 API 엔드포인트
+
+### Project Management APIs
+```
+GET  /                              // 메인 페이지 (React SPA)
+GET  /api/projects                  // 전체 프로젝트 목록
+GET  /api/projects/:name            // 특정 프로젝트 상세 정보
+GET  /api/git-status                // Git 변경사항이 있는 프로젝트
 ```
 
-#### 1.3 UI 구성
-
+### Claude Code Integration (claude-code-webui 통합)
 ```
-┌─────────────────────────────────────────────────────────┐
-│                     Header                               │
-│              📊 Project Dashboard                        │
-└─────────────────────────────────────────────────────────┘
-┌─────────────────────────────────────────────────────────┐
-│                   Stats Cards                            │
-│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐  │
-│  │  Total   │ │   Git    │ │ Modified │ │  Node.js │  │
-│  │  Projects│ │   Repos  │ │          │ │ Projects │  │
-│  └──────────┘ └──────────┘ └──────────┘ └──────────┘  │
-└─────────────────────────────────────────────────────────┘
-┌─────────────────────────────────────────────────────────┐
-│                     Filters                              │
-│  [All] [Node.js] [Python] [Java] [Modified] [No Git]   │
-└─────────────────────────────────────────────────────────┘
-┌─────────────────────────────────────────────────────────┐
-│                  Project Grid                            │
-│  ┌───────────┐  ┌───────────┐  ┌───────────┐          │
-│  │  Project  │  │  Project  │  │  Project  │          │
-│  │   Card    │  │   Card    │  │   Card    │          │
-│  │           │  │           │  │           │          │
-│  │ - Name    │  │ - Name    │  │ - Name    │          │
-│  │ - Type    │  │ - Type    │  │ - Type    │          │
-│  │ - Git     │  │ - Git     │  │ - Git     │          │
-│  │ - README  │  │ - README  │  │ - README  │          │
-│  └───────────┘  └───────────┘  └───────────┘          │
-└─────────────────────────────────────────────────────────┘
-                         ┌──┐
-                         │🔄│  Refresh Button
-                         └──┘
+GET  /api/claude/projects                              // Claude 프로젝트 목록
+POST /api/claude/chat                                  // Claude 채팅 (NDJSON streaming)
+POST /api/claude/abort/:requestId                      // 요청 취소
+GET  /api/claude/histories/:project                    // 대화 히스토리
+GET  /api/claude/histories/:project/:sessionId         // 특정 대화
 ```
 
 ---
 
-### 2. Backend Layer (서버)
+## 📁 프로젝트 구조 (리팩토링 후)
 
-#### 2.1 기술 스택
-- **런타임**: Node.js
-- **프레임워크**: Express.js
-- **파일 시스템**: fs (Node.js 내장)
-- **프로세스 실행**: child_process (execSync)
-
-#### 2.2 API 엔드포인트
-
-```javascript
-// API 라우트
-GET  /                       // 메인 페이지 (index.html)
-GET  /api/projects           // 모든 프로젝트 목록 조회
-GET  /api/projects/:name     // 특정 프로젝트 상세 조회
-GET  /api/git-status         // Git 변경사항이 있는 프로젝트만 조회
+```
+project-manager/
+├── backend/                      # Hono Backend
+│   ├── src/
+│   │   ├── index.ts             # Hono 앱 엔트리포인트
+│   │   ├── routes/              # API 라우트
+│   │   │   ├── projects.ts      # 프로젝트 관리 API
+│   │   │   ├── git.ts           # Git 상태 API
+│   │   │   └── claude.ts        # Claude 통합 API (프록시)
+│   │   ├── services/            # 비즈니스 로직
+│   │   │   ├── projectService.ts
+│   │   │   ├── gitService.ts
+│   │   │   └── claudeService.ts
+│   │   ├── utils/               # 유틸리티
+│   │   │   ├── logger.ts
+│   │   │   ├── fs.ts
+│   │   │   └── validation.ts
+│   │   └── types/               # 타입 정의
+│   │       └── index.ts
+│   ├── tsconfig.json
+│   └── package.json
+│
+├── frontend/                     # React Frontend
+│   ├── src/
+│   │   ├── App.tsx              # 메인 앱 컴포넌트
+│   │   ├── main.tsx             # React 엔트리포인트
+│   │   ├── components/          # UI 컴포넌트
+│   │   │   ├── ProjectCard.tsx
+│   │   │   ├── ProjectList.tsx
+│   │   │   ├── GitStatus.tsx
+│   │   │   └── ClaudeChat.tsx
+│   │   ├── hooks/               # Custom Hooks
+│   │   │   ├── useProjects.ts
+│   │   │   ├── useGitStatus.ts
+│   │   │   └── useClaudeChat.ts
+│   │   ├── contexts/            # React Contexts
+│   │   │   └── AppContext.tsx
+│   │   ├── types/               # 타입 정의
+│   │   │   └── index.ts
+│   │   ├── config/              # 설정
+│   │   │   └── api.ts
+│   │   └── styles/              # 스타일
+│   │       └── index.css
+│   ├── index.html
+│   ├── vite.config.ts
+│   ├── tailwind.config.ts
+│   ├── tsconfig.json
+│   └── package.json
+│
+├── shared/                       # 공유 타입 (Backend/Frontend)
+│   └── types.ts
+│
+├── docs/                         # 문서
+│   ├── ARCHITECTURE.md
+│   └── API.md
+│
+├── package.json                  # Monorepo 루트 (optional)
+├── tsconfig.base.json            # 공통 TypeScript 설정
+└── README.md
 ```
 
-**API 응답 구조**
+---
 
-```json
-{
-  "success": true,
-  "projects": [
-    {
-      "name": "project-name",
-      "path": "/absolute/path/to/project",
-      "types": ["Node.js", "Python"],
-      "git": {
-        "hasGit": true,
-        "branch": "main",
-        "changes": 5,
-        "ahead": 0,
-        "behind": 0,
-        "status": "modified"
-      },
-      "modified": {
-        "text": "2 days ago",
-        "days": 2
-      },
-      "readme": {
-        "exists": true,
-        "content": "# Project\n...",
-        "preview": "# Project (first 500 chars)..."
+## 🚀 개발 환경 설정
+
+### 초기 설정
+
+```bash
+# 1. Backend 설정
+cd backend
+npm init -y
+npm install hono @hono/node-server
+npm install -D typescript @types/node tsx
+
+# 2. Frontend 설정
+npm create vite@latest frontend -- --template react-swc-ts
+cd frontend
+npm install
+npm install -D tailwindcss@next @tailwindcss/vite@next
+
+# 3. 개발 실행
+# Terminal 1: Backend
+cd backend
+npm run dev  # tsx watch src/index.ts
+
+# Terminal 2: Frontend
+cd frontend
+npm run dev  # vite
+
+# Terminal 3: Claude Code WebUI (optional)
+cd ../claude-code-webui/backend
+npm run dev
+```
+
+### 개발 서버 포트
+- Frontend: `http://localhost:5173` (Vite 기본)
+- Backend: `http://localhost:3000` (Hono)
+- Claude WebUI: `http://localhost:8081` (별도 프로세스)
+
+---
+
+## 🔄 마이그레이션 계획
+
+### Phase 1: Backend (Hono + TypeScript)
+1. ✅ 프로젝트 구조 생성
+2. ✅ Hono 앱 초기화
+3. ✅ 기존 Express API를 Hono로 포팅
+   - `/api/projects` → `routes/projects.ts`
+   - `/api/git-status` → `routes/git.ts`
+4. ✅ TypeScript 타입 정의
+5. ✅ 에러 핸들링 및 로깅
+
+### Phase 2: Frontend (React 19 + Vite)
+1. ✅ Vite + React 프로젝트 생성
+2. ✅ TailwindCSS 설정
+3. ✅ 기존 UI를 React 컴포넌트로 변환
+   - 프로젝트 카드 → `<ProjectCard />`
+   - 필터/검색 → `<FilterBar />`
+   - 모달 → `<ProjectModal />`
+4. ✅ Custom Hooks 작성
+5. ✅ API 통신 레이어
+
+### Phase 3: Claude Code 통합
+1. ✅ Backend에 Claude API 프록시 추가
+2. ✅ Frontend에 Claude 채팅 UI 컴포넌트
+3. ✅ NDJSON 스트리밍 처리
+4. ✅ 세션 관리
+
+### Phase 4: 최적화 및 배포
+1. ✅ 빌드 최적화
+2. ✅ 코드 스플리팅
+3. ✅ Docker 컨테이너화
+4. ✅ 프로덕션 배포
+
+---
+
+## 🎨 UI/UX 개선 사항
+
+### TailwindCSS v4 활용
+```css
+/* tailwind.config.ts */
+export default {
+  theme: {
+    extend: {
+      colors: {
+        primary: 'var(--color-primary)',
+        secondary: 'var(--color-secondary)',
       }
     }
-  ]
+  }
 }
 ```
 
-#### 2.3 핵심 함수
-
-```javascript
-// 프로젝트 분석 함수
-detectProjectType(dir)      // package.json, requirements.txt 등 탐지
-getGitStatus(dir)           // Git 상태 확인 (execSync)
-getLastModified(dir)        // 최종 수정 시간 계산
-readReadme(dir)             // README.md 읽기
-
-// 프로젝트 정보 수집
-getProjectInfo(path, name)  // 종합 정보 수집
-```
-
----
-
-### 3. Data Flow (데이터 흐름)
-
-#### 3.1 프로젝트 로딩 시퀀스
-
-```
-[Browser]                [Express Server]           [File System]
-    │                           │                          │
-    │ GET /api/projects         │                          │
-    ├──────────────────────────>│                          │
-    │                           │                          │
-    │                           │ fs.readdirSync()         │
-    │                           ├─────────────────────────>│
-    │                           │<─────────────────────────┤
-    │                           │   [dir1, dir2, ...]      │
-    │                           │                          │
-    │                           │ For each directory:      │
-    │                           │                          │
-    │                           │ detectProjectType()      │
-    │                           ├─────────────────────────>│
-    │                           │   fs.existsSync()        │
-    │                           │<─────────────────────────┤
-    │                           │                          │
-    │                           │ getGitStatus()           │
-    │                           ├─────────────────────────>│
-    │                           │   execSync('git status') │
-    │                           │<─────────────────────────┤
-    │                           │                          │
-    │                           │ readReadme()             │
-    │                           ├─────────────────────────>│
-    │                           │   fs.readFileSync()      │
-    │                           │<─────────────────────────┤
-    │                           │                          │
-    │ JSON Response             │                          │
-    │<──────────────────────────┤                          │
-    │                           │                          │
-    │ Render UI                 │                          │
-    │                           │                          │
-```
-
-#### 3.2 자동 새로고침 플로우
-
-```
-Browser Timeline:
-
-0s    ─────> loadProjects() (초기 로드)
-30s   ─────> loadProjects() (자동 새로고침)
-60s   ─────> loadProjects() (자동 새로고침)
-...   (30초마다 반복)
-
-또는 사용자가 🔄 버튼 클릭 시 즉시 새로고침
-```
-
----
-
-## 🔧 주요 기능 설계
-
-### 1. 프로젝트 타입 감지
-
-**알고리즘**:
-```javascript
-detectProjectType(dir) {
-  types = []
-
-  if exists(package.json)
-    types.add("Node.js")
-
-  if exists(requirements.txt OR setup.py OR pyproject.toml)
-    types.add("Python")
-
-  if exists(pom.xml OR build.gradle OR gradlew)
-    types.add("Java/Spring")
-
-  if exists(Cargo.toml)
-    types.add("Rust")
-
-  // ... 다른 타입들
-
-  return types.length > 0 ? types : ["Unknown"]
-}
-```
-
-### 2. Git 상태 분석
-
-**실행 흐름**:
-```
-1. .git 폴더 존재 확인
-   ↓
-2. git branch --show-current
-   → 현재 브랜치 이름
-   ↓
-3. git status --porcelain
-   → 변경된 파일 개수
-   ↓
-4. git remote update (선택)
-   ↓
-5. git rev-list --count @{u}..HEAD
-   → ahead 커밋 수
-   ↓
-6. git rev-list --count HEAD..@{u}
-   → behind 커밋 수
-   ↓
-7. 결과 반환
-```
-
-### 3. README 미리보기 및 모달
-
-**두 단계 표시**:
-```
-1. 카드 미리보기
-   - README 첫 500자만 표시
-   - "📄 README" 뱃지 표시
-   - 존재하지 않으면 "No README.md"
-
-2. 모달 전체보기
-   - 클릭 시 전체 README 내용 표시
-   - 기본 마크다운 렌더링
-   - ESC, 배경 클릭, X 버튼으로 닫기
-```
-
-### 4. 필터링 시스템
-
-**필터 타입**:
-```javascript
-filters = {
-  'all':      모든 프로젝트,
-  'node':     types.includes('Node.js'),
-  'python':   types.includes('Python'),
-  'java':     types.includes('Java/Spring'),
-  'modified': git.changes > 0,
-  'no-git':   !git.hasGit
-}
-```
-
----
-
-## 🛠️ 유틸리티 도구
-
-### 1. README 자동 생성 스크립트
-
-**파일**: `generate-readmes.js`
-
-**실행 흐름**:
-```
-1. 프로젝트 루트 디렉토리 스캔
-   ↓
-2. 각 프로젝트별로:
-   - README.md 존재 여부 확인
-   - 존재하지 않으면:
-     a. 프로젝트 타입 감지
-     b. package.json 정보 추출
-     c. Git 정보 추출
-     d. 템플릿 기반 README 생성
-     e. 파일 저장
-   ↓
-3. 결과 통계 출력
-```
-
-**템플릿 구조**:
-```markdown
-# 프로젝트명
-
-설명
-
-## 📋 프로젝트 정보
-- 타입, Git 브랜치 등
-
-## 🛠 기술 스택
-- 의존성 목록
-
-## 🚀 설치 및 실행
-- 실행 명령어
-
-## 📁 프로젝트 구조
-- 디렉토리 트리
-```
+### React 19 새 기능 활용
+- **Actions**: 폼 제출 최적화
+- **use() Hook**: 비동기 데이터 로딩
+- **React Compiler**: 자동 메모이제이션
 
 ---
 
 ## 📊 성능 최적화
 
-### 1. 프론트엔드 최적화
+### Frontend
+- Vite의 빠른 HMR (Hot Module Replacement)
+- SWC 컴파일러로 빠른 빌드
+- React 19의 자동 메모이제이션
+- Code Splitting (React.lazy + Suspense)
 
-```javascript
-// 자동 새로고침 간격
-const REFRESH_INTERVAL = 30000; // 30초
-
-// README 미리보기 글자 수 제한
-const PREVIEW_LIMIT = 500; // 500자
-
-// Git remote update 타임아웃
-const GIT_TIMEOUT = 5000; // 5초
-```
-
-### 2. 백엔드 최적화
-
-- **동기 파일 읽기**: 간단한 구조에서는 동기 방식 사용
-- **에러 핸들링**: try-catch로 실패 시 graceful degradation
-- **캐싱 없음**: 실시간 데이터 우선 (향후 추가 가능)
+### Backend
+- Hono의 초고속 라우팅 (Express보다 3배 빠름)
+- 비동기 파일 시스템 처리 (fs/promises)
+- 캐싱 레이어 (향후)
 
 ---
 
-## 🔐 보안 고려사항
+## 🔒 보안 고려사항
 
-### 1. 경로 보안
-```javascript
-// project-manager 폴더 자체는 제외
-if (item === 'project-manager') continue;
+### Backend
+```typescript
+import { cors } from 'hono/cors'
+import { secureHeaders } from 'hono/secure-headers'
 
-// 숨김 폴더 제외
-if (item.startsWith('.')) continue;
+app.use('*', cors())
+app.use('*', secureHeaders())
 ```
 
-### 2. Git 명령 안전성
-```javascript
-// 안전한 execSync 사용
-execSync('git status --porcelain', {
-  cwd: dir,
-  encoding: 'utf8',
-  timeout: 5000  // 타임아웃 설정
-});
-```
+### Frontend
+- XSS 방지 (React 자동 이스케이프)
+- CSRF 토큰 (필요시)
+- 환경 변수 관리 (Vite의 import.meta.env)
 
 ---
 
-## 📁 프로젝트 구조
+## 🧪 테스트 전략
 
-```
-web-dashboard/
-├── server.js                 # Express 서버 메인
-├── package.json              # 의존성 관리
-├── generate-readmes.js       # README 자동 생성 스크립트
-├── ARCHITECTURE.md           # 아키텍처 문서 (현재 파일)
-├── README.md                 # 프로젝트 README
-└── public/
-    └── index.html            # 프론트엔드 SPA
-        ├── <style>           # CSS (내장)
-        └── <script>          # JavaScript (내장)
-```
+### Unit Tests (Vitest)
+```typescript
+// backend/src/services/__tests__/projectService.test.ts
+import { describe, it, expect } from 'vitest'
+import { getProjects } from '../projectService'
 
----
-
-## 🚀 배포 및 실행
-
-### 개발 환경
-```bash
-npm install
-npm start
-# http://localhost:3000
+describe('projectService', () => {
+  it('should return project list', async () => {
+    const projects = await getProjects()
+    expect(projects).toBeInstanceOf(Array)
+  })
+})
 ```
 
-### 프로덕션 환경 (향후)
-```bash
-# PM2로 프로세스 관리
-pm2 start server.js --name "project-dashboard"
+### E2E Tests (Playwright)
+```typescript
+// e2e/project-list.spec.ts
+import { test, expect } from '@playwright/test'
 
-# 또는 Docker
-docker build -t project-dashboard .
-docker run -p 3000:3000 -v /path/to/projects:/projects project-dashboard
+test('프로젝트 목록 표시', async ({ page }) => {
+  await page.goto('http://localhost:5173')
+  await expect(page.locator('.project-card')).toBeVisible()
+})
 ```
-
----
-
-## 🔮 향후 개선 방향
-
-### 1. 기능 개선
-- [ ] 프로젝트 실행 버튼 (npm start, python run 등)
-- [ ] Git commit/push UI
-- [ ] 프로젝트 검색 기능
-- [ ] 즐겨찾기/태그 기능
-- [ ] 프로젝트별 메모 기능
-
-### 2. 성능 개선
-- [ ] Redis 캐싱 추가
-- [ ] WebSocket으로 실시간 업데이트
-- [ ] 프로젝트 스캔 비동기 처리
-- [ ] 가상 스크롤 (많은 프로젝트 처리)
-
-### 3. UX 개선
-- [ ] 다크 모드
-- [ ] 프로젝트 정렬 (이름, 날짜, 타입)
-- [ ] 그리드/리스트 뷰 전환
-- [ ] 프로젝트 통계 차트
-
-### 4. 통합 개선
-- [ ] GitHub API 통합 (이슈, PR)
-- [ ] CI/CD 상태 표시
-- [ ] Docker 컨테이너 상태
-- [ ] 로그 뷰어
-
----
-
-## 📝 기술 결정 이유
-
-### 1. Vanilla JavaScript 선택
-- **이유**:
-  - 빠른 프로토타이핑
-  - 의존성 최소화
-  - 학습 곡선 낮음
-  - 번들링 불필요
-
-### 2. 단일 HTML 파일
-- **이유**:
-  - 간단한 배포
-  - 빠른 로딩
-  - 빌드 프로세스 불필요
-
-### 3. 자동 새로고침 (30초)
-- **이유**:
-  - Git 상태는 자주 변경됨
-  - 사용자 수동 새로고침 부담 감소
-  - 네트워크 부하는 낮음 (로컬 서버)
-
-### 4. Git CLI 사용 (라이브러리 대신)
-- **이유**:
-  - 신뢰성 높음
-  - 설치된 Git 활용
-  - 복잡한 Git 라이브러리 불필요
 
 ---
 
 ## 📚 참고 자료
 
-- [Express.js Documentation](https://expressjs.com/)
-- [Node.js File System API](https://nodejs.org/api/fs.html)
-- [Git Documentation](https://git-scm.com/doc)
-- [MDN Web Docs - Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API)
+### Backend
+- [Hono Documentation](https://hono.dev/)
+- [TypeScript Handbook](https://www.typescriptlang.org/docs/)
+
+### Frontend
+- [React 19 Blog](https://react.dev/blog)
+- [Vite Guide](https://vitejs.dev/)
+- [TailwindCSS v4](https://tailwindcss.com/)
+
+### Tools
+- [Vitest](https://vitest.dev/)
+- [Playwright](https://playwright.dev/)
 
 ---
 
-*Last Updated: 2025-01-01*
-*Version: 1.0.0*
+## 🔮 향후 개선 방향
+
+### 단기 (1-2개월)
+- ✅ TypeScript 마이그레이션 완료
+- ✅ React 19 + Vite 전환
+- ✅ Claude Code 통합
+
+### 중기 (3-6개월)
+- WebSocket 실시간 업데이트
+- GraphQL API (optional)
+- 데이터베이스 연동 (SQLite/PostgreSQL)
+- 사용자 인증
+
+### 장기 (6개월+)
+- GitHub/GitLab API 통합
+- CI/CD 파이프라인 모니터링
+- 플러그인 시스템
+- AI 기반 프로젝트 분석
+
+---
+
+*Last Updated: 2025-01-11*
+*Version: 2.0.0 - Modern Stack Migration*
+*Tech Stack: Hono + TypeScript + React 19 + Vite + TailwindCSS*

@@ -16,7 +16,7 @@ services:
     volumes:
       # 호스트의 프로젝트 디렉토리를 컨테이너의 /projects에 마운트
       # 실제 프로젝트 경로로 변경하세요
-      - ${PROJECTS_PATH:-/Users/inswave/MyDir/projec}:/projects:ro
+      - ${PROJECTS_PATH:-/Users/jy_mac/MyDir/project}:/projects:ro
     restart: unless-stopped
     networks:
       - project-manager-network
@@ -34,7 +34,7 @@ services:
       - ${HOME}/.claude.json:/root/.claude.json:ro
       - ${HOME}/.claude:/root/.claude:ro
       # Mount projects directory (read-write for Claude to make changes)
-      - ${PROJECTS_PATH:-/Users/inswave/MyDir/projec}:/projects:rw
+      - ${PROJECTS_PATH:-/Users/jy_mac/MyDir/project}:/projects:rw
     environment:
       - NODE_ENV=production
     restart: unless-stopped

@@ -41,6 +41,8 @@ echo ""
 
 # Docker Compose로 Project Manager 실행
 echo "📦 Project Manager 컨테이너를 시작합니다..."
+# Unset PROJECTS_PATH to ensure .env file is used
+unset PROJECTS_PATH
 docker compose up -d app
 
 if [ $? -ne 0 ]; then
